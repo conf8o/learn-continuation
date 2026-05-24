@@ -1,4 +1,3 @@
 (executable
  (public_name learn-continuation)
- (name main)
- (libraries learn_continuation))
+ (name main))
