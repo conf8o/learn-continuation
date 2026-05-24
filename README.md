@@ -8,9 +8,9 @@ effect systemの理解を目標として、まずはその文脈となる継続�
 ---
 
 - OCaml 5.4
-  - opamのインストールは、公式のインストールスクリプトがおすすめ。[解説ページ](https://ocaml.org/install#linux_mac_bsd)
+  - opamのインストールは、公式のインストールスクリプトがおすすめ。[インストールページ](https://ocaml.org/install#linux_mac_bsd)
   - [effect handler](https://ocaml.org/manual/5.4/effects.html)
 - Racket 9.1
   - racketのインストールは、[mise](https://mise.jdx.dev/getting-started.html) からでいいかも
-  - 公式はダウンロードさせてsh実行する形。([ダウンロードページ](https://racket-lang.org/download/))
+  - [公式のインストールスクリプトダウンロードページ](https://racket-lang.org/download/)
   - [call/cc](https://docs.racket-lang.org/guide/conts.html)
