@@ -1,9 +1,11 @@
 #! /usr/local/bin/racket
 #lang racket/base
+(require racket/control)
 
 ; --- lib ---
 
 ; ```
+; Initial -> Available
 ; Available -> Reserved
 ; Reserved -> Running
 ; Running -> Available
@@ -11,7 +13,8 @@
 ; Available -> Running
 ; ```
 (define (valid-state-transition state new-state)
-  (or (and (string=? state "Available") (string=? new-state "Reserved"))
+  (or (and (string=? state "Initial") (string=? new-state "Available"))
+      (and (string=? state "Available") (string=? new-state "Reserved"))
       (and (string=? state "Reserved") (string=? new-state "Running"))
       (and (string=? state "Running") (string=? new-state "Available"))
       (and (string=? state "Reserved") (string=? new-state "Available"))
@@ -26,28 +29,28 @@
 
 ; --- main ---
 
-(define state #f)
-
-(define (app)
-  (update-state state "Availdable"))
-
-
-; --- middleware 的な ---
+(define state "Initial")
 
 (define (handle-result result)
   (if (is-error result)
       (displayln (string-append "Error: " result))
       (begin
+        (display (string-append "Trans from `" state "`"))
         (set! state result)
-        (displayln state))))
+        (displayln (string-append " to `" state "`")))))
+
+(define trans #f)
 
 (define (initialize)
-  (set! state "Running"))
+  (displayln "initialized.")
+  (let [(result (let/cc continue
+                  (set! trans continue)
+                  (continue (update-state state "Available"))))]
+    (handle-result result)
+    (displayln "done")))
 
-(handle-result
-  (call/cc
-    (lambda (k)
-      (displayln "前処理")
-      (initialize)
-      (k (app))
-      (displayln "(k (app)) でcall/ccの場所に戻るので、呼び出されないはず"))))
+(initialize)
+(trans "Reserved")
+(trans "Running")
+(trans "Available")
+(trans "Available")
