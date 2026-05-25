@@ -1,6 +1,6 @@
 #! /usr/local/bin/racket
 #lang racket/base
-(require racket/control)
+(require racket/control racket/string)
 
 ; --- lib ---
 
@@ -30,27 +30,50 @@
 ; --- main ---
 
 (define state "Initial")
+(define error-state #f)
 
-(define (handle-result result)
+(define (handle-state! result)
   (if (is-error result)
-      (displayln (string-append "Error: " result))
-      (begin
-        (display (string-append "Trans from `" state "`"))
-        (set! state result)
-        (displayln (string-append " to `" state "`")))))
+      (set! error-state result)
+      (set! state result)))
 
+(define (log . messages)
+  (displayln (string-join (cons "[log]" messages))))
+
+; 保存するやつ
 (define trans #f)
-
 (define (initialize)
-  (displayln "initialized.")
-  (let [(result (let/cc continue
-                  (set! trans continue)
-                  (continue (update-state state "Available"))))]
-    (handle-result result)
-    (displayln "done")))
+  (reset
+    (let [(requested-state (shift k
+                             (set! trans k)
+                             (k "Available")))]
+      (log "request:" state "->" requested-state)
 
-(initialize)
-(trans "Reserved")
-(trans "Running")
-(trans "Available")
-(trans "Available")
+      (handle-state! (update-state state requested-state))
+
+      (if error-state
+          (log "error on update state:" error-state)
+          (log "updated:" requested-state)))))
+
+; 大域脱出
+(define (app)
+  (let/cc raise
+
+    (initialize)
+    (when error-state (raise error-state))
+
+    (trans "Reserved")
+    (when error-state (raise error-state))
+
+    (trans "Running")
+    (when error-state (raise error-state))
+
+    (trans "Available")
+    (when error-state (raise error-state))
+
+    (raise "Done")))
+
+(let [(app-result (app))]
+  (if (is-error app-result)
+      (log "error on app: " app-result)
+      (log app-result)))
