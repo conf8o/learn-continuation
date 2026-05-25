@@ -5,7 +5,7 @@ effect systemの理解を目標として、まずはその文脈となる継続�
 - Racketの call/cc から、古典的な継続を理解する
 - OCamlの effect handler から、安全にハンドリングできる継続を理解する
 
----
+## 採用言語
 
 - OCaml 5.4
   - opamのインストールは、公式のインストールスクリプトがおすすめ。[インストールページ](https://ocaml.org/install#linux_mac_bsd)
