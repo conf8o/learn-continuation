@@ -19,7 +19,7 @@
  (name learn-continuation)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml)
+ (depends ocaml dune ocaml-lsp-server fmt)
  (tags
   ("add topics" "to describe" your project)))
 
