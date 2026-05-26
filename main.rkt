@@ -41,12 +41,12 @@
   (displayln (string-join (cons "[log]" messages))))
 
 ; 保存するやつ
-(define trans #f)
+(define update-state! #f)
 (define (initialize)
   (reset
-    (let [(requested-state (shift k
-                             (set! trans k)
-                             (k "Available")))]
+    (let [(requested-state (shift update
+                             (set! update update-state!)
+                             (update "Available")))]
       (log "request:" state "->" requested-state)
 
       (handle-state! (update-state state requested-state))
@@ -62,13 +62,13 @@
     (initialize)
     (when error-state (raise error-state))
 
-    (trans "Reserved")
+    (update-state! "Reserved")
     (when error-state (raise error-state))
 
-    (trans "Running")
+    (update-state! "Running")
     (when error-state (raise error-state))
 
-    (trans "Available")
+    (update-state! "Available")
     (when error-state (raise error-state))
 
     (raise "Done")))
