@@ -50,10 +50,16 @@ let validate_state_transition state new_state : (state, error) result =
 
 
 let update_state new_state =
+  let current_state = perform GetState in
   match validate_state_transition (perform GetState) new_state with
   | Ok new_state ->
     let state = perform (UpdateState new_state) in
-    perform (Log (Printf.sprintf "State %s" (string_of_state state)));
+    perform
+      (Log
+         (Printf.sprintf
+            "State %s -> %s"
+            (string_of_state current_state)
+            (string_of_state state)));
     Ok new_state
   | Error err ->
     perform (Log (Printf.sprintf "Error: %s" (string_of_error err)));
@@ -81,7 +87,7 @@ let app_handler f =
     state := new_state;
     continue k !state
   | effect Log msg, k ->
-    Printf.printf "%s\n" msg;
+    Printf.printf "[log] %s\n" msg;
     continue k ()
   | effect Reject err, _ -> Printf.printf "Rejected: %s.\n" (string_of_error err)
 

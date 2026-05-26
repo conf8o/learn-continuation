@@ -44,9 +44,9 @@
 (define update-state! #f)
 (define (initialize)
   (reset
-    (let [(requested-state (shift update
-                             (set! update update-state!)
-                             (update "Available")))]
+    (let ([requested-state (shift update
+                             (set! update-state! update)
+                             (update "Available"))])
       (log "request:" state "->" requested-state)
 
       (handle-state! (update-state state requested-state))
@@ -73,7 +73,7 @@
 
     (raise "Done")))
 
-(let [(app-result (app))]
+(let ([app-result (app)])
   (if (is-error app-result)
       (log "error on app: " app-result)
       (log app-result)))
