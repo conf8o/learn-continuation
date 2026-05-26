@@ -24,8 +24,6 @@ let string_of_error = function
       (string_of_state new_state)
 
 
-let state = ref Initial
-
 type _ Effect.t +=
   | GetState : state Effect.t
   | UpdateState : state -> state Effect.t
@@ -72,8 +70,10 @@ let app () =
   |> Result.map (fun _ -> update_state Available)
 
 
-let main () =
-  match app () with
+let state = ref Initial
+
+let app_handler f =
+  match f () with
   | Ok _ -> Printf.printf "Done.\n"
   | Error _ -> Printf.printf "Done with Error.\n"
   | effect GetState, k -> continue k !state
@@ -86,4 +86,4 @@ let main () =
   | effect Reject err, _ -> Printf.printf "Rejected: %s.\n" (string_of_error err)
 
 
-let () = main ()
+let () = app_handler app
