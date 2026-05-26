@@ -66,7 +66,14 @@ let update_state new_state =
 
 
 let app () =
-  match update_state Available with
+  update_state Available
+  |> Result.map (fun _ -> update_state Reserved)
+  |> Result.map (fun _ -> update_state Running)
+  |> Result.map (fun _ -> update_state Available)
+
+
+let main () =
+  match app () with
   | Ok _ -> Printf.printf "Done.\n"
   | Error _ -> Printf.printf "Done with Error.\n"
   | effect GetState, k -> continue k !state
@@ -79,4 +86,4 @@ let app () =
   | effect Reject err, _ -> Printf.printf "Rejected: %s.\n" (string_of_error err)
 
 
-let () = app ()
+let () = main ()
