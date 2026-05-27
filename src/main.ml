@@ -51,7 +51,7 @@ let validate_state_transition state new_state : (state, error) result =
 
 let update_state new_state =
   let current_state = perform GetState in
-  match validate_state_transition (perform GetState) new_state with
+  match validate_state_transition current_state new_state with
   | Ok new_state ->
     let state = perform (UpdateState new_state) in
     perform
@@ -59,29 +59,24 @@ let update_state new_state =
          (Printf.sprintf
             "State %s -> %s"
             (string_of_state current_state)
-            (string_of_state state)));
-    Ok new_state
+            (string_of_state state)))
   | Error err ->
     perform (Log (Printf.sprintf "Error: %s" (string_of_error err)));
-    perform (Reject err);
-
-    (* これ意味ない?まあでもRejectがcontinueするかどうかあまり意識したくないしいいか *)
-    Error err
+    perform (Reject err)
 
 
 let app () =
+  update_state Available;
+  update_state Reserved;
+  update_state Running;
   update_state Available
-  |> Result.map (fun _ -> update_state Reserved)
-  |> Result.map (fun _ -> update_state Running)
-  |> Result.map (fun _ -> update_state Available)
 
 
 let state = ref Initial
 
 let app_handler f =
   match f () with
-  | Ok _ -> Printf.printf "Done.\n"
-  | Error _ -> Printf.printf "Done with Error.\n"
+  | () -> Printf.printf "Done.\n"
   | effect GetState, k -> continue k !state
   | effect UpdateState new_state, k ->
     state := new_state;
