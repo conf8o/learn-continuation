@@ -65,6 +65,32 @@ let update_state new_state =
     perform (Reject err)
 
 
+let state = ref Initial
+
+let app_effect_handler (type a) (eff : a Effect.t) =
+  match eff with
+  | GetState -> Some (fun (k : (a, _) continuation) -> continue k !state)
+  | UpdateState new_state ->
+    Some
+      (fun (k : (a, _) continuation) ->
+        state := new_state;
+        continue k !state)
+  | Log msg ->
+    Some
+      (fun (k : (a, _) continuation) ->
+        Printf.printf "[log] %s\n" msg;
+        continue k ())
+  | Reject err ->
+    Some
+      (fun (_k : (a, _) continuation) ->
+        Printf.printf "Rejected: %s.\n" (string_of_error err))
+  | _ -> None
+
+
+let app_handler =
+  { retc = (fun () -> Printf.printf "Done.\n"); exnc = raise; effc = app_effect_handler }
+
+
 let app () =
   update_state Available;
   update_state Reserved;
@@ -72,19 +98,4 @@ let app () =
   update_state Available
 
 
-let state = ref Initial
-
-let app_handler f =
-  match f () with
-  | () -> Printf.printf "Done.\n"
-  | effect GetState, k -> continue k !state
-  | effect UpdateState new_state, k ->
-    state := new_state;
-    continue k !state
-  | effect Log msg, k ->
-    Printf.printf "[log] %s\n" msg;
-    continue k ()
-  | effect Reject err, _ -> Printf.printf "Rejected: %s.\n" (string_of_error err)
-
-
-let () = app_handler app
+let () = match_with app () app_handler
