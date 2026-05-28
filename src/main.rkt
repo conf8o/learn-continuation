@@ -1,11 +1,11 @@
 #! /usr/local/bin/racket
 #lang racket/base
-(require racket/control racket/string)
+(require racket/control racket/string )
 
 ; --- lib ---
 
 ; ```
-; Initial -> Available
+; Preparing -> Available
 ; Available -> Reserved
 ; Reserved -> Running
 ; Running -> Available
@@ -13,7 +13,7 @@
 ; Available -> Running
 ; ```
 (define (valid-state-transition state new-state)
-  (or (and (string=? state "Initial") (string=? new-state "Available"))
+  (or (and (string=? state "Preparing") (string=? new-state "Available"))
       (and (string=? state "Available") (string=? new-state "Reserved"))
       (and (string=? state "Reserved") (string=? new-state "Running"))
       (and (string=? state "Running") (string=? new-state "Available"))
@@ -29,7 +29,7 @@
 
 ; --- main ---
 
-(define state "Initial")
+(define state "Preparing")
 (define error-state #f)
 
 (define (handle-state! result)

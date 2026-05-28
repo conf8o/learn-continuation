@@ -2,7 +2,7 @@ open Effect
 open Effect.Deep
 
 type state =
-  | Initial
+  | Preparing
   | Available
   | Reserved
   | Running
@@ -10,7 +10,7 @@ type state =
 type error = InvalidStateTransition of state * state
 
 let string_of_state = function
-  | Initial -> "Initial"
+  | Preparing -> "Preparing"
   | Available -> "Available"
   | Reserved -> "Reserved"
   | Running -> "Running"
@@ -31,7 +31,7 @@ type _ Effect.t +=
   | Reject : error -> unit Effect.t
 
 (*
-  Initial -> Available
+  Preparing -> Available
   Available -> Reserved
   Available -> Running
   Reserved -> Running
@@ -40,7 +40,7 @@ type _ Effect.t +=
 *)
 let validate_state_transition state new_state : (state, error) result =
   match state, new_state with
-  | Initial, Available -> Ok Available
+  | Preparing, Available -> Ok Available
   | Available, Reserved -> Ok Reserved
   | Available, Running -> Ok Running
   | Reserved, Running -> Ok Running
@@ -65,7 +65,7 @@ let update_state new_state =
     perform (Reject err)
 
 
-let state = ref Initial
+let state = ref Preparing
 
 let app_effect_handler (type a) (eff : a Effect.t) =
   match eff with
