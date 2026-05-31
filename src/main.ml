@@ -90,7 +90,7 @@ let app () =
   update_state Available;
   update_state Reserved;
   update_state Running;
-  update_state Available
+  update_state Preparing
 
 
 let () = match_with app () app_handler
