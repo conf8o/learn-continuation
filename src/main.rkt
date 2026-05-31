@@ -1,24 +1,32 @@
 #! /usr/local/bin/racket
 #lang racket/base
-(require racket/control racket/string )
+(require racket/control racket/match racket/string)
 
 ; --- lib ---
 
 ; ```
 ; Preparing -> Available
+; Preparing -> Reserved
+; Available -> Preparing
 ; Available -> Reserved
-; Reserved -> Running
-; Running -> Available
-; Reserved -> Available
 ; Available -> Running
+; Reserved -> Preparing
+; Reserved -> Available
+; Reserved -> Running
+; Running -> Preparing
 ; ```
 (define (valid-state-transition state new-state)
-  (or (and (string=? state "Preparing") (string=? new-state "Available"))
-      (and (string=? state "Available") (string=? new-state "Reserved"))
-      (and (string=? state "Reserved") (string=? new-state "Running"))
-      (and (string=? state "Running") (string=? new-state "Available"))
-      (and (string=? state "Reserved") (string=? new-state "Available"))
-      (and (string=? state "Available") (string=? new-state "Running"))))
+  (match (list state new-state)
+    [(list "Preparing" "Available") #t]
+    [(list "Preparing" "Reserved") #t]
+    [(list "Available" "Preparing") #t]
+    [(list "Available" "Reserved") #t]
+    [(list "Available" "Running") #t]
+    [(list "Reserved" "Preparing") #t]
+    [(list "Reserved" "Available") #t]
+    [(list "Reserved" "Running") #t]
+    [(list "Running" "Preparing") #t]
+    [_ #f]))
 
 (define (update-state state new-state)
   (if (valid-state-transition state new-state)
@@ -55,23 +63,23 @@
           (log "error on update state:" error-state)
           (log "updated:" requested-state)))))
 
-; 大域脱出
+; 早期リターン
 (define (app)
-  (let/cc raise
+  (let/cc return
 
     (initialize)
-    (when error-state (raise error-state))
+    (when error-state (return error-state))
 
     (update-state! "Reserved")
-    (when error-state (raise error-state))
+    (when error-state (return error-state))
 
     (update-state! "Running")
-    (when error-state (raise error-state))
+    (when error-state (return error-state))
 
-    (update-state! "Available")
-    (when error-state (raise error-state))
+    (update-state! "Preparing")
+    (when error-state (return error-state))
 
-    (raise "Done")))
+    (return "Done")))
 
 (let ([app-result (app)])
   (if (is-error app-result)
