@@ -122,9 +122,8 @@
          (log "error: InvalidTransition")
          (reject "InvalidTransition"))]
       [s
-       (begin
-         (put-state s)
-         (log "state updated: " s))])))
+       (let ([new-state (put-state s)])
+         (log "state updated: " new-state))])))
 
 (define (app-delimited)
   (reset
