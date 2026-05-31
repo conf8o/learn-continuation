@@ -30,22 +30,17 @@ type _ Effect.t +=
   | Log : string -> unit Effect.t
   | Reject : error -> unit Effect.t
 
-(*
-  Preparing -> Available
-  Available -> Reserved
-  Available -> Running
-  Reserved -> Running
-  Reserved -> Available
-  Running -> Available
-*)
 let validate_state_transition state new_state : (state, error) result =
   match state, new_state with
   | Preparing, Available -> Ok Available
+  | Preparing, Reserved -> Ok Reserved
+  | Available, Preparing -> Ok Preparing
   | Available, Reserved -> Ok Reserved
   | Available, Running -> Ok Running
+  | Reserved, Preparing -> Ok Preparing
   | Reserved, Running -> Ok Running
   | Reserved, Available -> Ok Available
-  | Running, Available -> Ok Available
+  | Running, Preparing -> Ok Preparing
   | _ -> Error (InvalidStateTransition (state, new_state))
 
 
